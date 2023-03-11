@@ -1,11 +1,11 @@
 # -- Import --
-
-from binance.client import Client
 import numpy as np
 import pandas as pd
 from decimal import Decimal
 import time
+from binance.client import Client
 from binance.enums import HistoricalKlinesType
+import ccxt
 import ta
 import pandas_ta as pda
 
@@ -17,7 +17,6 @@ client = Client(api_key='', api_secret='') # Enter your own API-key and API-secr
 
 # -- Wallet -- 
 initialWallet = 1000
-maxDrawdown = -0.15
 
 # -- Hyper parameters --
 leverage = 1
@@ -75,12 +74,12 @@ def closeShortCondition(row):
         return False
 
 def convert_amount_to_precision(symbol, amount):
-    stepSize = 0.001
+    stepSize = 0.001  # chiffre à modifier en fonction de l'asset considéré
     amount = Decimal(str(amount))
     return float(amount - amount % Decimal(str(stepSize)))
 
 def convert_price_to_precision(symbol, price):
-    stepSize = 0.01
+    stepSize = 0.01  # chiffre à modifier en fonction de l'asset considéré
     price = Decimal(str(price))
     return float(price - price % Decimal(str(stepSize)))
 
@@ -182,6 +181,5 @@ if orderInProgress != '':
         except:
             print("Unexpected error close short order !")
         orderInProgress = ''
-
 
 print("")
