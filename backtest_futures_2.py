@@ -292,3 +292,5 @@ for r in reasons:
     print(r+" number :", dt.groupby('reason')['date'].nunique()[r])
 del dt['date']
 dt['wallet'].plot(figsize=(20, 10))
+
+dt.to_csv("trades.csv")
