@@ -285,4 +285,6 @@ reasons = dt['reason'].unique()
 for r in reasons:
     print(r+" number :", dt.groupby('reason')['date'].nunique()[r])
 del dt['date']
-dt['wallet'].plot(subplots=True, figsize=(20, 10))
+dt['wallet'].plot(figsize=(20, 10))
+
+dt.to_csv("trades.csv")
