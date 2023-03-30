@@ -68,8 +68,6 @@ print("Indicators loaded 100%")
 
 # -- If you want to run your BackTest on a specific period, uncomment the line below --
 #df = df['2022-11-01':'2023-03-05']
-df.head()
-
 
 # -- Definition of dt, that will be the dataset to do your trades analyses --
 dt = pd.DataFrame(columns=['date', 'position', 'reason', 'price', 'frais', 'wallet', 'drawBack'])
