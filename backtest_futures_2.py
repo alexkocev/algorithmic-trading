@@ -293,4 +293,5 @@ for r in reasons:
 del dt['date']
 dt['wallet'].plot(figsize=(20, 10))
 
+df.to_csv("candles.csv")
 dt.to_csv("trades.csv")
