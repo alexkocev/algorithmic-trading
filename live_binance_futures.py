@@ -1,3 +1,6 @@
+
+# Live code for Binance
+
 # -- Import --
 import numpy as np
 import pandas as pd
@@ -5,9 +8,7 @@ from decimal import Decimal
 import time
 from binance.client import Client
 from binance.enums import HistoricalKlinesType
-import ccxt
 import ta
-import pandas_ta as pda
 
 print(time.strftime("%y-%d-%m %H:%M:%S", time.gmtime()))
 
@@ -37,7 +38,7 @@ df = df.set_index(df['timestamp'])
 df.index = pd.to_datetime(df.index, unit='ms')
 del df['timestamp']
 
-# Technical indicators
+# -- Technical indicators --
 df['RSI'] = ta.momentum.rsi(close=df['close'], window=14)
 df['MA'] = ta.trend.sma_indicator(close=df['close'], window=500)
 
@@ -74,12 +75,12 @@ def closeShortCondition(row):
         return False
 
 def convert_amount_to_precision(symbol, amount):
-    stepSize = 0.001  # chiffre à modifier en fonction de l'asset considéré
+    stepSize = 0.001  # figure to modified as function of the asset considered
     amount = Decimal(str(amount))
     return float(amount - amount % Decimal(str(stepSize)))
 
 def convert_price_to_precision(symbol, price):
-    stepSize = 0.01  # chiffre à modifier en fonction de l'asset considéré
+    stepSize = 0.01  # # figure to modified as function of the asset considered
     price = Decimal(str(price))
     return float(price - price % Decimal(str(stepSize)))
 
