@@ -3,14 +3,11 @@
 
 # -- Import --
 import pandas as pd
-import pandas_ta as pda
 from binance.client import Client
 import ta
-import matplotlib.pyplot as plt
 import numpy as np
 from binance.enums import HistoricalKlinesType
 import datetime
-import ccxt
 import warnings
 warnings.filterwarnings('ignore')
 
