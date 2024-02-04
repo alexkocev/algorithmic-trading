@@ -2,15 +2,14 @@
 # Backtest code
 
 # -- Import --
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import datetime
 from binance.client import Client
 from binance.enums import HistoricalKlinesType
-import ccxt
 import ta
-import pandas_ta as pda
+
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -84,6 +83,7 @@ longIniPrice = 0
 shortIniPrice = 0
 
 # -- Condition to open Market LONG --
+
 def openLongCondition(row):
     if (row['close'] > row['MA'] 
         and row['RSI'] < 30
@@ -93,6 +93,7 @@ def openLongCondition(row):
         return False
 
 # -- Condition to close Market LONG --
+
 def closeLongCondition(row):
     if row['RSI'] > 70:
         return True
@@ -100,6 +101,7 @@ def closeLongCondition(row):
         return False
 
 # -- Condition to open Market SHORT --
+
 def openShortCondition(row):
     if (row['close'] < row['MA']
         and row['RSI'] > 70
@@ -109,6 +111,7 @@ def openShortCondition(row):
         return False
 
 # -- Condition to close Market SHORT --
+
 def closeShortCondition(row):
     if row['RSI'] < 30:
         return True
