@@ -1,3 +1,6 @@
+
+# Backtest code
+
 # -- Import --
 import pandas as pd
 import pandas_ta as pda
@@ -14,7 +17,7 @@ warnings.filterwarnings('ignore')
 # -- Define Binance Client --
 client = Client()
 
-# -- You can change variables below --
+
 leverage = 1
 wallet = 1000
 makerFee = 0.0002
@@ -28,7 +31,7 @@ SlPct = 0.025
 TpPct = 0.05
 
 # -- You can change the crypto pair ,the start date and the time interval below --
-pairName = "ETHBUSD"
+pairName = "ETHUSDT"
 startDate = "01 october 2022"
 timeInterval = '15m'
 
@@ -49,7 +52,7 @@ del df['timestamp']
     
 print("Data loaded 100%")
 
-# Technical indicators
+# -- Technical indicators --
 df['RSI'] = ta.momentum.rsi(close=df['close'], window=14)
 df['MA'] = ta.trend.sma_indicator(close=df['close'], window=500)
 
@@ -63,7 +66,6 @@ print("Indicators loaded 100%")
 dt = pd.DataFrame(columns=['date', 'position', 'reason',
                            'price', 'frais', 'wallet', 'drawBack'])
 
-# -- Do not touch these values --
 initialWallet = wallet
 lastAth = wallet
 previousRow = df.iloc[0]
@@ -123,7 +125,7 @@ for index, row in df.iterrows():
     conditionDate = weekDay < 5
     # -- If there is NO order in progress --
     if orderInProgress == '' and not stopTrades and conditionDate:
-        # -- Check If you have to open a LONG --
+        # -- Check if you have to open a LONG --
         if openLongCondition(row, previousRow) and not (lastPosition=='long' and lastPrChange<0):
             orderInProgress = 'LONG'
             longIniPrice = row['close']
@@ -138,7 +140,7 @@ for index, row in df.iterrows():
                      'frais': round(fee, 3), 'wallet': round(wallet+fee, 2), 'drawBack': round((wallet-lastAth)/lastAth, 3)}
             dt = dt.append(myrow, ignore_index=True)
         
-        # -- Check If you have to open a SHORT --
+        # -- Check if you have to open a SHORT --
         if openShortCondition(row, previousRow) and not (lastPosition=='short' and lastPrChange<0):
             orderInProgress = 'SHORT'
             shortIniPrice = row['close'] 
@@ -173,7 +175,7 @@ for index, row in df.iterrows():
                 position = 'Close Long'
                 reason = 'Take Profit Long'
                 closePosition = True
-            # -- Check If you have to close the LONG --
+            # -- Check if you have to close the LONG --
             elif closeLongCondition(row, previousRow):
                 orderInProgress = ''
                 closePrice = row['close']
@@ -204,7 +206,7 @@ for index, row in df.iterrows():
                 position = 'Close Short'
                 reason = 'Take Profit Short'
                 closePosition = True
-            # -- Check If you have to close the SHORT --
+            # -- Check if you have to close the SHORT --
             elif closeShortCondition(row, previousRow):
                 orderInProgress = ''
                 closePrice = row['close']
@@ -292,5 +294,5 @@ for r in reasons:
 del dt['date']
 dt['wallet'].plot(figsize=(20, 10))
 
-df.to_csv("candles.csv")
-dt.to_csv("trades.csv")
+#df.to_csv("candles.csv")
+#dt.to_csv("trades.csv")
