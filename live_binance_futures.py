@@ -12,9 +12,7 @@ import ta
 
 print(time.strftime("%y-%d-%m %H:%M:%S", time.gmtime()))
 
-
 client = Client(api_key='', api_secret='') # Enter your own API-key and API-secret here
-#client = ccxt.bybit({"apiKey": '', "secret": '', "options": {'defaultType': 'future'}})
 
 # -- Wallet -- 
 initialWallet = 1000
