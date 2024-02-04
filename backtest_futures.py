@@ -1,5 +1,7 @@
-# -- Import --
 
+# Backtest code
+
+# -- Import --
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -15,12 +17,11 @@ warnings.filterwarnings('ignore')
 # -- Define Binance Client --
 client = Client()
 
-# -- You can change variables below --
 
 leverage = 1
 wallet = 1000
 makerFee = 0.0002
-takerFee = 0.0004
+takerFee = 0.0006
 
 # -- TP / SL parameters --
 stopLossActivation = True
@@ -52,9 +53,10 @@ df
     
 print("Data loaded 100%")
 
-# Technical indicators
+# -- Technical indicators --
 df['RSI'] = ta.momentum.rsi(close=df['close'], window=14)
-df['MA'] = ta.trend.sma_indicator(close=df['close'], window=500)
+df['MA'] = ta.trend.sma_indicator(close=df['volume'], window=500)
+df
 
 plt.plot(df['RSI'])
 plt.ylabel('RSI')
@@ -72,7 +74,7 @@ print("Indicators loaded 100%")
 # -- Definition of dt, that will be the dataset to do your trades analyses --
 dt = pd.DataFrame(columns=['date', 'position', 'reason', 'price', 'frais', 'wallet', 'drawBack'])
 
-# -- Do not touch these values --
+
 initialWallet = wallet
 lastAth = wallet
 stopLoss = 0
@@ -117,7 +119,7 @@ def closeShortCondition(row):
 for index, row in df.iterrows():
     # -- If there is NO order in progress --
     if orderInProgress == '':
-        # -- Check If you have to open a LONG --
+        # -- Check if you have to open a LONG --
         if openLongCondition(row):
             orderInProgress = 'LONG'
             longIniPrice = row['close']
@@ -132,7 +134,7 @@ for index, row in df.iterrows():
                      'frais': fee, 'wallet': wallet, 'drawBack': (wallet-lastAth)/lastAth}
             dt = dt.append(myrow, ignore_index=True)
         
-        # -- Check If you have to open a SHORT --
+        # -- Check if you have to open a SHORT --
         if openShortCondition(row):
             orderInProgress = 'SHORT'
             shortIniPrice = row['close'] 
@@ -167,7 +169,7 @@ for index, row in df.iterrows():
                 position = 'Close Long'
                 reason = 'Take Profit Long'
                 closePosition = True
-            # -- Check If you have to close the LONG --
+            # -- Check if you have to close the LONG --
             elif closeLongCondition(row):
                 orderInProgress = ''
                 closePrice = row['close']
@@ -195,7 +197,7 @@ for index, row in df.iterrows():
                 position = 'Close Short'
                 reason = 'Take Profit Short'
                 closePosition = True
-            # -- Check If you have to close the SHORT --
+            # -- Check if you have to close the SHORT --
             elif closeShortCondition(row):
                 orderInProgress = ''
                 closePrice = row['close']
