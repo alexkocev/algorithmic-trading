@@ -146,7 +146,7 @@ if orderInProgress == '':
         slPrice = convert_price_to_precision(pairSymbol, actualPrice*(1+SlPct))
         tpPrice = convert_price_to_precision(pairSymbol, actualPrice*(1-TpPct))
         try:
-            client.create_order(pairSymbol, 'market', 'sell', longAmount, params={'leverage': leverage, 'takeProfitPrice': tpPrice, 'stopLossPrice': slPrice})
+            client.create_order(pairSymbol, 'market', 'sell', shortAmount, params={'leverage': leverage, 'takeProfitPrice': tpPrice, 'stopLossPrice': slPrice})
             print("Short", shortAmount, coin, 'at', actualPrice)
         except: 
             print("Unexpected error open short order !")  
