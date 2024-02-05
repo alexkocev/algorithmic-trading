@@ -16,8 +16,6 @@ api_key = ''
 api_secret = ''
 client = ccxt.bybit({"apiKey": '', "secret": '', "options": {'defaultType': 'swap'}})
 
-# -- Wallet -- 
-initialWallet = 1000
 
 # -- Hyper parameters --
 leverage = 1
@@ -33,7 +31,6 @@ timeInterval = '1h'
 klinesT = client.fetch_ohlcv(pairSymbol, timeInterval, limit=500)
 df = pd.DataFrame(np.array(klinesT)[:,:6], columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 df['close'], df['high'], df['low'], df['open'] = pd.to_numeric(df['close']), pd.to_numeric(df['high']), pd.to_numeric(df['low']), pd.to_numeric(df['open'])
-
 df = df.set_index(df['timestamp'])
 df.index = pd.to_datetime(df.index, unit='ms')
 del df['timestamp']
@@ -75,7 +72,7 @@ def closeShortCondition(row):
         return False
 
 def convert_amount_to_precision(symbol, amount):
-    stepSize = 0.001  # figure to modified as function of the asset considered
+    stepSize = 0.01  # figure to modified as function of the asset considered
     amount = Decimal(str(amount))
     return float(amount - amount % Decimal(str(stepSize)))
 
