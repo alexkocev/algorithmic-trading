@@ -12,10 +12,9 @@ import ta
 
 print(time.strftime("%y-%d-%m %H:%M:%S", time.gmtime()))
 
+
 client = Client(api_key='', api_secret='') # Enter your own API-key and API-secret here
 
-# -- Wallet -- 
-initialWallet = 1000
 
 # -- Hyper parameters --
 leverage = 1
@@ -31,7 +30,6 @@ timeInterval = '1h'
 klinesT = client.get_historical_klines(pairSymbol, timeInterval, "30 day ago UTC", klines_type=HistoricalKlinesType.FUTURES)
 df = pd.DataFrame(np.array(klinesT)[:,:6], columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 df['close'], df['high'], df['low'], df['open'] = pd.to_numeric(df['close']), pd.to_numeric(df['high']), pd.to_numeric(df['low']), pd.to_numeric(df['open'])
-
 df = df.set_index(df['timestamp'])
 df.index = pd.to_datetime(df.index, unit='ms')
 del df['timestamp']
