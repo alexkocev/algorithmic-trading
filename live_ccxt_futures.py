@@ -131,7 +131,7 @@ row = df.iloc[-2]
 
 if orderInProgress == '':
     if openLongCondition(row):
-        longQuantityInUsdt = usdtBalance * 0.999
+        longQuantityInUsdt = usdtBalance * 0.9
         longAmount = convert_amount_to_precision(pairSymbol, longQuantityInUsdt*leverage/actualPrice)
         tpPrice = convert_price_to_precision(pairSymbol, actualPrice*(1+TpPct))
         slPrice = convert_price_to_precision(pairSymbol, actualPrice*(1-SlPct))
@@ -141,7 +141,7 @@ if orderInProgress == '':
         except:
             print("Unexpected error open long order !")
     elif openShortCondition(row): 
-        shortQuantityInUsdt = usdtBalance * 0.999
+        shortQuantityInUsdt = usdtBalance * 0.9
         shortAmount = convert_amount_to_precision(pairSymbol, shortQuantityInUsdt*leverage/actualPrice)
         slPrice = convert_price_to_precision(pairSymbol, actualPrice*(1+SlPct))
         tpPrice = convert_price_to_precision(pairSymbol, actualPrice*(1-TpPct))
