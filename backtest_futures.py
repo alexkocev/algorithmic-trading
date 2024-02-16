@@ -1,22 +1,16 @@
 
-# Backtest code
-
 # -- Import --
-
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 from binance.client import Client
 from binance.enums import HistoricalKlinesType
+import ccxt
+import pandas as pd
 import ta
-
+import numpy as np
+import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
-# -- Define Binance Client --
-client = Client()
-
-
+# -- You can change variables below --
 leverage = 1
 wallet = 1000
 makerFee = 0.0002
@@ -28,34 +22,33 @@ takeProfitActivation = True
 SlPct = 0.025
 TpPct = 0.05
 
-# -- You can change the crypto pair, the start date and the time interval below --
+# -- Crypto pair, start date and time interval --
 pairName = 'ETHUSDT'
 startDate = '2022-10-01'
 timeInterval = '1h'
 
+# -- Binance Client --
+client = Client()
 # -- Load all price data from binance API --
 klinesT = client.get_historical_klines(pairName, timeInterval, startDate, 
                                        klines_type=HistoricalKlinesType.FUTURES)
 
-# --- If you want to load data from other exchange (like Bybit), uncomment the line below --
+# --- To load data from other exchange (like Bybit), uncomment the lines below --
 #client = ccxt.bybit()
-#klinesT = client.fetch_ohlcv(pairName, timeInterval, 
-#                             since=client.parse8601('{0}T00:00:00'.format(startDate)))
+#klinesT = client.fetch_ohlcv(pairName, timeInterval, limit=1000)
 
-# -- Define your dataset --
+# -- Define the dataset --
 df = pd.DataFrame(np.array(klinesT)[:,:6], columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 df['close'], df['high'], df['low'], df['open'] = pd.to_numeric(df['close']), pd.to_numeric(df['high']), pd.to_numeric(df['low']), pd.to_numeric(df['open'])
 df = df.set_index(df['timestamp'])
 df.index = pd.to_datetime(df.index, unit='ms')
 del df['timestamp']
-df
     
 print("Data loaded 100%")
 
-# -- Technical indicators --
+# Technical indicators
 df['RSI'] = ta.momentum.rsi(close=df['close'], window=14)
-df['MA'] = ta.trend.sma_indicator(close=df['volume'], window=500)
-df
+df['MA'] = ta.trend.sma_indicator(close=df['close'], window=500)
 
 plt.plot(df['RSI'])
 plt.ylabel('RSI')
@@ -67,7 +60,7 @@ plt.show()
 
 print("Indicators loaded 100%")
 
-# -- If you want to run your BackTest on a specific period, uncomment the line below --
+# -- To run the backtest on a specific period, uncomment the line below --
 #df = df['2022-11-01':'2023-03-05']
 
 # -- Definition of dt, that will be the dataset to do your trades analyses --
@@ -83,7 +76,6 @@ longIniPrice = 0
 shortIniPrice = 0
 
 # -- Condition to open Market LONG --
-
 def openLongCondition(row):
     if (row['close'] > row['MA'] 
         and row['RSI'] < 30
@@ -93,7 +85,6 @@ def openLongCondition(row):
         return False
 
 # -- Condition to close Market LONG --
-
 def closeLongCondition(row):
     if row['RSI'] > 70:
         return True
@@ -101,7 +92,6 @@ def closeLongCondition(row):
         return False
 
 # -- Condition to open Market SHORT --
-
 def openShortCondition(row):
     if (row['close'] < row['MA']
         and row['RSI'] > 70
@@ -111,7 +101,6 @@ def openShortCondition(row):
         return False
 
 # -- Condition to close Market SHORT --
-
 def closeShortCondition(row):
     if row['RSI'] < 30:
         return True
@@ -122,7 +111,7 @@ def closeShortCondition(row):
 for index, row in df.iterrows():
     # -- If there is NO order in progress --
     if orderInProgress == '':
-        # -- Check if you have to open a LONG --
+        # -- Check If you have to open a LONG --
         if openLongCondition(row):
             orderInProgress = 'LONG'
             longIniPrice = row['close']
@@ -137,7 +126,7 @@ for index, row in df.iterrows():
                      'frais': fee, 'wallet': wallet, 'drawBack': (wallet-lastAth)/lastAth}
             dt = dt.append(myrow, ignore_index=True)
         
-        # -- Check if you have to open a SHORT --
+        # -- Check If you have to open a SHORT --
         if openShortCondition(row):
             orderInProgress = 'SHORT'
             shortIniPrice = row['close'] 
@@ -172,7 +161,7 @@ for index, row in df.iterrows():
                 position = 'Close Long'
                 reason = 'Take Profit Long'
                 closePosition = True
-            # -- Check if you have to close the LONG --
+            # -- Check If you have to close the LONG --
             elif closeLongCondition(row):
                 orderInProgress = ''
                 closePrice = row['close']
@@ -200,7 +189,7 @@ for index, row in df.iterrows():
                 position = 'Close Short'
                 reason = 'Take Profit Short'
                 closePosition = True
-            # -- Check if you have to close the SHORT --
+            # -- Check If you have to close the SHORT --
             elif closeShortCondition(row):
                 orderInProgress = ''
                 closePrice = row['close']
@@ -220,7 +209,7 @@ for index, row in df.iterrows():
                      'frais': round(fee, 3), 'wallet': round(wallet, 2), 'drawBack': round((wallet-lastAth)/lastAth, 3),}
             dt = dt.append(myrow, ignore_index=True) 
 
-# -- BackTest Analyses --
+# -- Backtest analyses --
 dt = dt.set_index(dt['date'])
 dt.index = pd.to_datetime(dt.index)
 dt['resultat%'] = dt['wallet'].pct_change()*100
@@ -261,7 +250,7 @@ except:
 totalTrades = totalGoodTrades + totalBadTrades
 winRateRatio = (totalGoodTrades/totalTrades) * 100
 
-print("BackTest finished, final wallet :", round(wallet,2), "$")
+print("Backtest finished, final wallet :", round(wallet,2), "$")
 
 print("Starting balance :", initialWallet, "$")
 print("Pair Symbol :",pairName,)
