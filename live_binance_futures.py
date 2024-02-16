@@ -114,7 +114,9 @@ actualPrice = df.iloc[-1]['close']
 
 row = df.iloc[-2]
 
+# -- If there is no order in progress --
 if orderInProgress == '':
+    # -- Check if you have to open a LONG --
     if openLongCondition(row):
         longQuantityInUsdt = usdtBalance * 0.999
         longAmount = convert_amount_to_precision(pairSymbol, longQuantityInUsdt*leverage/actualPrice)
@@ -134,6 +136,7 @@ if orderInProgress == '':
                                         stopPrice=slPrice, closePosition=True)
         except:
             print("Unexpected error TP/SL !")
+     # -- Check if you have to open a SHORT --
     elif openShortCondition(row): 
         shortQuantityInUsdt = usdtBalance * 0.999
         shortAmount = convert_amount_to_precision(pairSymbol, shortQuantityInUsdt*leverage/actualPrice)
@@ -151,7 +154,9 @@ if orderInProgress == '':
         except:
             print("Unexpected error TP/SL !")
 
+# -- If there is an order in progress --
 if orderInProgress != '':
+    # -- Check if you have to close the LONG --
     if orderInProgress == 'Long' and closeLongCondition(row):   
         for openOrder in openOrders:
             client.futures_cancel_order(symbol=pairSymbol, orderId=openOrder['orderId'])
@@ -164,6 +169,7 @@ if orderInProgress != '':
         except:
             print("Unexpected error close long order !")
         orderInProgress = ''
+    # -- Check if you have to close the SHORT --
     elif orderInProgress == 'Short' and closeShortCondition(row):
         for openOrder in openOrders:
             client.futures_cancel_order(symbol=pairSymbol, orderId=openOrder['orderId'])
