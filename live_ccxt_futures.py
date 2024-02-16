@@ -1,6 +1,4 @@
 
-# Live code for CEXs
-
 # -- Import --
 import numpy as np
 import pandas as pd
@@ -11,10 +9,10 @@ import ta
 
 print(time.strftime("%y-%d-%m %H:%M:%S", time.gmtime()))
 
-# Enter your own API-key and API-secret here
+# Enter your API-key and API-secret here
 api_key = ''
 api_secret = ''
-client = ccxt.bybit({"apiKey": '', "secret": '', "options": {'defaultType': 'swap'}})
+client = ccxt.binance({"apiKey": '', "secret": '', "options": {'defaultType': 'future'}})
 
 
 # -- Hyper parameters --
@@ -72,12 +70,12 @@ def closeShortCondition(row):
         return False
 
 def convert_amount_to_precision(symbol, amount):
-    stepSize = 0.01  # figure to modified as function of the asset considered
+    stepSize = 0.01  # figure to modify as function of the asset considered
     amount = Decimal(str(amount))
     return float(amount - amount % Decimal(str(stepSize)))
 
 def convert_price_to_precision(symbol, price):
-    stepSize = 0.01  # figure to modified as function of the asset considered
+    stepSize = 0.01  # figure to modify as function of the asset considered
     price = Decimal(str(price))
     return float(price - price % Decimal(str(stepSize)))
 
@@ -126,7 +124,9 @@ actualPrice = df.iloc[-1]['close']
 
 row = df.iloc[-2]
 
+# -- If there is no order in progress --
 if orderInProgress == '':
+    # -- Check if you have to open a LONG --
     if openLongCondition(row):
         longQuantityInUsdt = usdtBalance * 0.9
         longAmount = convert_amount_to_precision(pairSymbol, longQuantityInUsdt*leverage/actualPrice)
@@ -137,6 +137,7 @@ if orderInProgress == '':
             print("Long", longAmount, coin, 'at', actualPrice)
         except:
             print("Unexpected error open long order !")
+    # -- Check if you have to open a SHORT --
     elif openShortCondition(row): 
         shortQuantityInUsdt = usdtBalance * 0.9
         shortAmount = convert_amount_to_precision(pairSymbol, shortQuantityInUsdt*leverage/actualPrice)
@@ -148,7 +149,9 @@ if orderInProgress == '':
         except: 
             print("Unexpected error open short order !")  
 
+# -- If there is an order in progress --
 if orderInProgress != '':
+    # -- Check if you have to close the LONG --
     if orderInProgress == 'Long' and closeLongCondition(row):   
         client.cancel_all_orders(pairSymbol)
         closeAmount = convert_amount_to_precision(pairSymbol, coinBalance*leverage*2)
@@ -158,6 +161,7 @@ if orderInProgress != '':
         except:
             print("Unexpected error close long order !")
         orderInProgress = ''
+    # -- Check if you have to close the SHORT --
     elif orderInProgress == 'Short' and closeShortCondition(row):
         client.cancel_all_orders(pairSymbol)
         closeAmount = convert_amount_to_precision(pairSymbol, coinBalance*leverage*2)
