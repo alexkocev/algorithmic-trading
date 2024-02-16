@@ -1,19 +1,15 @@
 
-# Backtest code
-
 # -- Import --
-import pandas as pd
 from binance.client import Client
+from binance.enums import HistoricalKlinesType
+import ccxt
+import pandas as pd
 import ta
 import numpy as np
-from binance.enums import HistoricalKlinesType
+import matplotlib.pyplot as plt
 import datetime
 import warnings
 warnings.filterwarnings('ignore')
-
-# -- Define Binance Client --
-client = Client()
-
 
 leverage = 1
 wallet = 1000
@@ -27,22 +23,24 @@ takeProfitActivation = False
 SlPct = 0.025
 TpPct = 0.05
 
-# -- You can change the crypto pair ,the start date and the time interval below --
-pairName = "ETHUSDT"
-startDate = "01 october 2022"
+# -- Crypto pair, start date and time interval --
+pairName = 'ETHUSDT'
+startDate = '2022-10-01'
 timeInterval = '15m'
 
+# -- Binance Client --
+client = Client()
 # -- Load all price data from binance API --
-klinesT = client.get_historical_klines(pairName, timeInterval, startDate, klines_type=HistoricalKlinesType.FUTURES)
-# --- Load data from other exchange (like Bybit) --
-#client = ccxt.bybit()
-#klinesT = client.fetch_ohlcv(pairName, timeInterval, since=client.parse8601('{0}T00:00:00'.format(startDate)))
+klinesT = client.get_historical_klines(pairName, timeInterval, startDate, 
+                                       klines_type=HistoricalKlinesType.FUTURES)
 
-# -- Define your dataset --
+# --- To load data from other exchange (like Bybit), uncomment the lines below --
+#client = ccxt.bybit()
+#klinesT = client.fetch_ohlcv(pairName, timeInterval, limit=1000)
+
+# -- Define the dataset --
 df = pd.DataFrame(np.array(klinesT)[:,:6], columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume'])
 df['close'], df['high'], df['low'], df['open'] = pd.to_numeric(df['close']), pd.to_numeric(df['high']), pd.to_numeric(df['low']), pd.to_numeric(df['open'])
-    
-# -- Set the date to index --
 df = df.set_index(df['timestamp'])
 df.index = pd.to_datetime(df.index, unit='ms')
 del df['timestamp']
@@ -56,7 +54,7 @@ df['MA'] = ta.trend.sma_indicator(close=df['close'], window=500)
 print("Indicators loaded 100%")
 
 
-# -- If you want to run your BackTest on a specific period, uncomment the line below --
+# -- To run the backtest on a specific period, uncomment the line below --
 #df = df['2022-11-01':'2023-03-05']
 
 # -- Definition of dt, that will be the dataset to do your trades analyses --
@@ -120,7 +118,7 @@ for index, row in df.iterrows():
     year, month, day = int(str(index)[0:4]), int(str(index)[5:7]), int(str(index)[8:10])
     weekDay = datetime.date(year, month, day).weekday()
     conditionDate = weekDay < 5
-    # -- If there is NO order in progress --
+    # -- If there is no order in progress --
     if orderInProgress == '' and not stopTrades and conditionDate:
         # -- Check if you have to open a LONG --
         if openLongCondition(row, previousRow) and not (lastPosition=='long' and lastPrChange<0):
@@ -235,7 +233,7 @@ for index, row in df.iterrows():
                 
     previousRow = row
 
-# -- BackTest Analyses --
+# -- Backtest analyses --
 dt = dt.set_index(dt['date'])
 dt.index = pd.to_datetime(dt.index)
 dt['resultat%'] = dt['wallet'].pct_change()*100
