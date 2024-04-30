@@ -104,6 +104,9 @@ def closeShortCondition(row, previousRow):
     else:
         return False
 
+# -- Add a column with next Open for entry price --
+df['next_open'] = df['open'].shift(-1)
+
 # -- Iteration on all your price dataset (df) --
 for index, row in df.iterrows():
     stopTrades = (wallet-initialWallet)/initialWallet < maxDrawdown
@@ -123,7 +126,7 @@ for index, row in df.iterrows():
         # -- Check if you have to open a LONG --
         if openLongCondition(row, previousRow) and not (lastPosition=='long' and lastPrChange<0):
             orderInProgress = 'LONG'
-            longIniPrice = row['close']
+            longIniPrice = row['next_open']  # Use next open price
             fee = wallet * proportionTrading * leverage * takerFee
             wallet -= fee
             if stopLossActivation:
@@ -138,7 +141,7 @@ for index, row in df.iterrows():
         # -- Check if you have to open a SHORT --
         if openShortCondition(row, previousRow) and not (lastPosition=='short' and lastPrChange<0):
             orderInProgress = 'SHORT'
-            shortIniPrice = row['close'] 
+            shortIniPrice = row['next_open']  # Use next open price 
             fee = wallet * proportionTrading * leverage * takerFee
             wallet -= fee
             if stopLossActivation:
@@ -150,7 +153,7 @@ for index, row in df.iterrows():
                      'frais': round(fee, 3), 'wallet':round(wallet+fee, 2), 'drawBack': round((wallet-lastAth)/lastAth, 3)}
             dt = dt.append(myrow, ignore_index=True) 
     # -- If there is an order in progress --
-    if orderInProgress != '':
+    elif orderInProgress != '':
         closePosition = False
         # -- Check if there is a LONG order in progress --
         if orderInProgress == 'LONG':
